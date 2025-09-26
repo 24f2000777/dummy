@@ -1,0 +1,15 @@
+name: Email Step Test
+
+on:
+  push:   # this means it runs every time you push code
+    branches: [ main ]   # or master, depending on your repo
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 24f2000777@ds.study.iitm.ac.in
+        run: echo "Hello, world!"
