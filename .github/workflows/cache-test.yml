@@ -1,25 +1,37 @@
-name: Cache Test Workflow
+name: Cache Prime
 
 on:
-  push:   # runs whenever you push code
-    branches: [ main ]   # change to "master" if your repo default branch is master
+  push:
+    branches: [ main ]   # change if your default branch is different
+  workflow_dispatch:      # lets you run it manually from the Actions tab
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Cache dependencies
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Cache step — we reference THIS by id: cache
       - name: Cache dependencies
-        id: cache-step
+        id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache
+          path: ~/.cache/pip
           key: cache-7799caf
 
-      # Prime the cache step
+      # Only install if cache missed (this primes the cache on first run)
+      - name: Install deps (prime cache on miss)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # REQUIRED: step named prime-cache-7799caf that echoes hit/miss
       - name: prime-cache-7799caf
-        run: echo "Cache result: ${{ steps.cache-step.outputs.cache-hit }}"
+        run: echo "cache-hit=${{ steps.cache.outputs.cache-hit }}"
